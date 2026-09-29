@@ -122,6 +122,17 @@ function changePrice(id){
 }
 function add(id){let p=products.find(x=>x.id===id);if(!p.available){alert('Out of stock');return;} cart.push(p);upd()}
 function upd(){if(!cart.length){document.getElementById('cartBar').style.display='none';return;} document.getElementById('cartBar').style.display='flex';document.getElementById('cc').innerText=cart.length;document.getElementById('ct').innerText=cart.reduce((s,x)=>s+x.price,0).toLocaleString()}
-function checkout(){if(!cart.length)return;let name=prompt('Customer Name?');if(!name)return;let phone=prompt('Phone?');if(!phone)return;let addr=prompt('Address?');if(!addr)return;let list=cart.map(c=>`• ${c.name} ₦${c.price}`).join('\n');let total=cart.reduce((s,x)=>s+x.price,0);let msg=`Hello ColdDrop 🛒\n${list}\n\nTotal: ₦${total}\nName: ${name}\nPhone: ${phone}\nAddress: ${addr}`;window.open(`https://wa.me/2347010806096?text=${encodeURIComponent(msg)}`,'_blank')}
+function checkout(){if(!cart.length)return;let name=prompt('Customer Name?');if(!name)return;let phone=prompt('Phone?');if(!phone)return;let addr=prompt('Address?');if(!addr)return;let list=cart.map(c=>`• ${c.name} ₦${c.price}`).join('\n');let total=cart.reduce((s,x)=>s+x.price,0);let msg=`Hello ColdDrop 🛒\n${list}\n\nTotal: ₦${total}\nName: ${name}\nPhone: ${phone}\nAddress: ${addr}`;window.open(`https://wa.me/function checkout(){
+ if(!cart.length)return;
+ let name=prompt('Customer Name?'); if(!name)return;
+ let phone=prompt('Phone?'); if(!phone)return;
+ let addr=prompt('Address?'); if(!addr)return;
+ let total=cart.reduce((s,x)=>s+x.price,0);
+ let order={name,phone,addr,items:[...cart],total,time:new Date().toLocaleString(),id:Date.now()};
+ let orders=JSON.parse(localStorage.getItem('colddrop_orders')||'[]');
+ orders.unshift(order);
+ localStorage.setItem('colddrop_orders',JSON.stringify(orders));
+ cart=[]; upd(); render();
+ alert('Order sent! Vendor go see am for vendor app!');}
 renderCats();render();
 </script></body></html>
