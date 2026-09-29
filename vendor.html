@@ -1,13 +1,26 @@
-function checkout(){
- if(!cart.length)return;
- let name=prompt('Customer Name?'); if(!name)return;
- let phone=prompt('Phone?'); if(!phone)return;
- let addr=prompt('Address?'); if(!addr)return;
- let total=cart.reduce((s,x)=>s+x.price,0);
- let order={name,phone,addr,items:[...cart],total,time:new Date().toLocaleString(),id:Date.now()};
- let orders=JSON.parse(localStorage.getItem('colddrop_orders')||'[]');
- orders.unshift(order);
- localStorage.setItem('colddrop_orders',JSON.stringify(orders));
- cart=[]; upd(); render();
- alert('Order sent! Vendor go see am for vendor app!');
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vendor - ColdDrop</title>
+<style>*{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif}body{background:#f8f8f8;padding:14px}
+.h{background:#000;color:white;padding:16px;border-radius:16px}.order{background:white;padding:14px;border-radius:14px;margin-top:12px;border:1px solid #eee}
+.b{padding:6px 10px;border-radius:8px;border:none;font-weight:800;font-size:12px}.done{background:#E30613;color:white}
+</style></head><body>
+<div class="h"><h2>📦 Vendor Orders</h2><p id="cnt" style="font-size:13px;margin-top:4px">0 orders</p>
+<button onclick="clearAll()" style="margin-top:8px;padding:6px 12px;border-radius:8px;border:none;background:white;color:black;font-weight:700">Clear All</button>
+</div>
+<div id="orders"></div>
+<script>
+function load(){
+ let os=JSON.parse(localStorage.getItem('colddrop_orders')||'[]');
+ document.getElementById('cnt').innerText=os.length+' orders';
+ document.getElementById('orders').innerHTML=os.map((o,i)=>`
+  <div class="order">
+   <b>${o.name}</b> - ${o.phone}<br><small>${o.addr}</small><br><small>${o.time}</small>
+   <div style="margin-top:8px;background:#f8f8f8;padding:8px;border-radius:8px">${o.items.map(x=>`• ${x.name} ₦${x.price}`).join('<br>')}<br><b>Total: ₦${o.total.toLocaleString()}</b></div>
+   <div style="margin-top:8px"><button class="b done" onclick="del(${i})">Mark Delivered ✓</button></div>
+  </div>`).join('') || '<p style="padding:20px;text-align:center;color:#888">No orders yet.</p>';
 }
+function del(i){let os=JSON.parse(localStorage.getItem('colddrop_orders')||'[]'); os.splice(i,1); localStorage.setItem('colddrop_orders',JSON.stringify(os)); load();}
+function clearAll(){if(confirm('Clear all?')){localStorage.removeItem('colddrop_orders'); load();}}
+load(); setInterval(load,2000);
+</script></body></html>
