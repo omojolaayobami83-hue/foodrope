@@ -1,0 +1,13 @@
+function checkout(){
+ if(!cart.length)return;
+ let name=prompt('Customer Name?'); if(!name)return;
+ let phone=prompt('Phone?'); if(!phone)return;
+ let addr=prompt('Address?'); if(!addr)return;
+ let total=cart.reduce((s,x)=>s+x.price,0);
+ let order={name,phone,addr,items:[...cart],total,time:new Date().toLocaleString(),id:Date.now()};
+ let orders=JSON.parse(localStorage.getItem('colddrop_orders')||'[]');
+ orders.unshift(order);
+ localStorage.setItem('colddrop_orders',JSON.stringify(orders));
+ cart=[]; upd(); render();
+ alert('Order sent! Vendor go see am for vendor app!');
+}
