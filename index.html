@@ -3,118 +3,81 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d3b8c">
+<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1046/1046784.png">
 <title>ColdDrop - Frozen Foods Lagos</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
 body{background:#f5f7fb}
-header{background:#0b3d91;color:white;padding:15px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
-.logo{font-weight:bold;font-size:20px}
+header{background:#0b3d91;color:white;padding:15px;display:flex;justify-content:space-between;align-items:center}
 .cart-btn{background:white;color:#0b3d91;border:none;padding:8px 15px;border-radius:20px;font-weight:bold}
 .tabs{display:flex;gap:10px;padding:10px;background:white}
-.tab{padding:8px 15px;border-radius:20px;border:1px solid #ddd;background:#eee}
+.tab{padding:8px 15px;background:#eee;border-radius:20px;border:none;cursor:pointer}
 .tab.active{background:#0b3d91;color:white}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
-.card{background:white;border-radius:12px;padding:10px;box-shadow:0 2px 5px rgba(0,0,0,.1)}
-.card img{width:100%;height:90px;object-fit:cover;border-radius:8px;background:#ddd}
-.card h3{font-size:14px;margin:5px 0}
-.price{color:#0b3d91;font-weight:bold}
-.btn{width:100%;background:#0b3d91;color:white;border:none;padding:8px;border-radius:8px;margin-top:5px}
-.seller-box{background:white;margin:10px;padding:15px;border-radius:12px;display:none}
-input,select{width:100%;padding:10px;margin:5px 0;border:1px solid #ddd;border-radius:8px}
-#cartBox{position:fixed;bottom:0;left:0;right:0;background:white;padding:15px;border-radius:15px 15px 0 0;box-shadow:0 -2px 10px rgba(0,0,0,.2);display:none;max-height:70vh;overflow:auto}
+.products{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px}
+.card{background:white;padding:10px;border-radius:10px;text-align:center}
+.card img{width:100%;height:100px;object-fit:cover;border-radius:8px}
+.card h4{margin:8px 0 4px}
+.card button{background:#0b3d91;color:white;border:none;padding:8px;width:100%;border-radius:6px;margin-top:5px}
+#cartBox{position:fixed;bottom:0;left:0;right:0;background:white;padding:15px;border-radius:20px 20px 0 0;box-shadow:0 -2px 10px rgba(0,0,0,0.2);display:none}
 </style>
 </head>
 <body>
 <header>
-<div class="logo">❄️ ColdDrop</div>
+<h3>ColdDrop ❄️</h3>
 <button class="cart-btn" onclick="openCart()">Cart (<span id="cartCount">0</span>)</button>
 </header>
-
 <div class="tabs">
-<button class="tab active" onclick="showTab('buyer')">Buy</button>
-<button class="tab" onclick="showTab('seller')">Sell</button>
+<button class="tab active">All</button>
+<button class="tab">Chicken</button>
+<button class="tab">Fish</button>
+<button class="tab">Turkey</button>
 </div>
-
-<div id="buyerTab">
-<div class="grid" id="productGrid"></div>
-</div>
-
-<div id="sellerTab" class="seller-box">
-<h3>Add Frozen Product</h3>
-<input id="pName" placeholder="e.g Chicken Lap 10kg">
-<input id="pPrice" type="number" placeholder="Price e.g 32000">
-<input id="pQty" placeholder="Qty e.g 50 cartons">
-<select id="pCat"><option>Chicken</option><option>Fish</option><option>Turkey</option><option>Beef</option></select>
-<input id="pLocation" placeholder="Location e.g Oyingbo">
-<button class="btn" onclick="addProduct()">Add Product</button>
-<p style="font-size:12px;margin-top:10px;color:green" id="msg"></p>
-</div>
+<div class="products" id="products"></div>
 
 <div id="cartBox">
 <h3>Your Cart</h3>
 <div id="cartItems"></div>
-<h4 id="total"></h4>
-<button class="btn" style="background:#25D366" onclick="checkoutWhatsApp()">Order via WhatsApp</button>
-<button class="btn" style="background:#ccc;color:black" onclick="closeCart()">Close</button>
+<p id="total" style="font-weight:bold;margin:10px 0"></p>
+<button onclick="checkoutWhatsApp()" style="background:#25D366;color:white;border:none;padding:12px;width:100%;border-radius:8px;font-weight:bold">Order on WhatsApp</button>
+<button onclick="closeCart()" style="background:#eee;border:none;padding:8px;width:100%;border-radius:8px;margin-top:8px">Close</button>
 </div>
 
 <script>
-let products = JSON.parse(localStorage.getItem('coldProducts')) || [
-{name:"Chicken Lap 10kg",price:32500,qty:"100 cartons",cat:"Chicken",loc:"Oyingbo"},
-{name:"Croaker Fish 20kg",price:58000,qty:"30 cartons",cat:"Fish",loc:"Ijora"},
-{name:"Turkey Full",price:45000,qty:"60 pcs",cat:"Turkey",loc:"Mushin"}
+const items=[
+{name:"Chicken Lap",price:3500,img:"https://cdn-icons-png.flaticon.com/512/1046/1046784.png"},
+{name:"Turkey Wing",price:4200,img:"https://cdn-icons-png.flaticon.com/512/1046/1046784.png"},
+{name:"Croaker Fish",price:3000,img:"https://cdn-icons-png.flaticon.com/512/1046/1046784.png"},
+{name:"Full Chicken",price:6500,img:"https://cdn-icons-png.flaticon.com/512/1046/1046784.png"}
 ];
-let cart = [];
-
+let cart=[];
 function render(){
- let grid=document.getElementById('productGrid');
- grid.innerHTML='';
- products.forEach((p,i)=>{
-  grid.innerHTML+=`<div class="card">
-   <img src="https://via.placeholder.com/150/0b3d91/fff?text=${p.cat}">
-   <h3>${p.name}</h3>
-   <small>${p.qty} - ${p.loc}</small>
-   <div class="price">₦${p.price.toLocaleString()}</div>
-   <button class="btn" onclick="addToCart(${i})">Add to Cart</button>
-  </div>`;
- });
+let h='';
+items.forEach((p,i)=>{
+h+=`<div class="card"><img src="${p.img}"><h4>${p.name}</h4><p>₦${p.price.toLocaleString()}</p><button onclick="addToCart(${i})">Add to Cart</button></div>`;
+});
+document.getElementById('products').innerHTML=h;
+document.getElementById('cartCount').innerText=cart.length;
 }
-function showTab(t){
- document.getElementById('buyerTab').style.display=t=='buyer'?'block':'none';
- document.getElementById('sellerTab').style.display=t=='seller'?'block':'none';
- document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
- event.target.classList.add('active');
-}
-function addProduct(){
- let p={name:pName.value,price:Number(pPrice.value),qty:pQty.value,cat:pCat.value,loc:pLocation.value};
- if(!p.name||!p.price)return alert('Fill name and price');
- products.unshift(p);
- localStorage.setItem('coldProducts',JSON.stringify(products));
- render();
- msg.innerText='Product added! Buyer go see am now';
- pName.value='';pPrice.value='';
-}
-function addToCart(i){
- cart.push(products[i]);
- document.getElementById('cartCount').innerText=cart.length;
- alert('Added to cart');
-}
+function addToCart(i){cart.push(items[i]);render();openCart();}
 function openCart(){
- document.getElementById('cartBox').style.display='block';
- let html=''; let tot=0;
- cart.forEach(c=>{html+=`<p>${c.name} - ₦${c.price.toLocaleString()}</p>`; tot+=c.price});
- document.getElementById('cartItems').innerHTML=html||'Cart empty';
- document.getElementById('total').innerText='Total: ₦'+tot.toLocaleString();
+let html='';let tot=0;
+cart.forEach(c=>{html+=`<p>${c.name} - ₦${c.price.toLocaleString()}</p>`;tot+=c.price});
+document.getElementById('cartItems').innerHTML=html||'Cart empty';
+document.getElementById('total').innerText='Total: ₦'+tot.toLocaleString();
+document.getElementById('cartBox').style.display='block';
 }
 function closeCart(){document.getElementById('cartBox').style.display='none'}
 function checkoutWhatsApp(){
- if(!cart.length)return alert('Cart empty');
- let tot=0; let text='Hello ColdDrop, I want to order:%0A';
- cart.forEach(c=>{text+=`- ${c.name} ₦${c.price}%0A`; tot+=c.price});
- text+=`%0ATotal: ₦${tot}`;
- window.open(`https://wa.me/2348012345678?text=${text}`,'_blank');
+if(!cart.length)return alert('Cart empty');
+let tot=0;let text='Hello ColdDrop, I want to order:%0A';
+cart.forEach(c=>{text+=`- ${c.name} ₦${c.price}%0A`;tot+=c.price});
+text+=`%0ATotal: ₦${tot}`;
+window.open(`https://wa.me/2348012345678?text=${text}`,'_blank');
 }
-render();if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}
+render();if('serviceWorker' in navigator){
+navigator.serviceWorker.register('sw.js');}
 </script>
 </body>
 </html>
