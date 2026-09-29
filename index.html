@@ -114,7 +114,7 @@ function checkoutWhatsApp(){
  text+=`%0ATotal: ₦${tot}`;
  window.open(`https://wa.me/2348012345678?text=${text}`,'_blank');
 }
-render();
+render();if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}
 </script>
 </body>
 </html>
